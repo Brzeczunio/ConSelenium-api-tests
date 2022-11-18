@@ -6,6 +6,11 @@ namespace ConSelenium.Api.Client.Builders
     {
         private UserLogin _userLogin { get; set; }
 
+        public UserLoginBuilder()
+        {
+            _userLogin = new UserLogin();
+        }
+
         public UserLoginBuilder AddUserName(string userName)
         {
             _userLogin.UserName = userName;

@@ -6,7 +6,7 @@ namespace ConSelenium.Settings
     {
         public static TestApiSettings Settings => AppSettings.Value;
 
-        private static Lazy<TestApiSettings> AppSettings => new Lazy<TestApiSettings>(GetSettings());
+        private static Lazy<TestApiSettings> AppSettings => new Lazy<TestApiSettings>(() => GetSettings());
 
         private static TestApiSettings GetSettings()
         {
