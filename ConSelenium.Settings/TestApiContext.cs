@@ -6,18 +6,18 @@ namespace ConSelenium.Settings
 {
     public class TestApiContext
     {
-        public LoggerDecoratedRestClient TestApiClientV1 { get; set; }
+        public LoggerDecoratedRestClient TestApiClient { get; set; }
 
         public TestApiContext() : base()
         {
-            TestApiClientV1 = new LoggerDecoratedRestClient(TestConfiguration.Settings.BaseUri);
-            TestApiClientV1.Authenticator = new TestApiAuthenticator(
+            TestApiClient = new LoggerDecoratedRestClient(TestConfiguration.Settings.BaseUri);
+            TestApiClient.Authenticator = new TestApiAuthenticator(
                 TestConfiguration.Settings.BaseUri, TestConfiguration.Settings.Users[User.Admin].Login, TestConfiguration.Settings.Users[User.Admin].Password);
         }
 
         public void Login(string userName, string password)
         {
-            TestApiClientV1.Authenticator = new TestApiAuthenticator(TestConfiguration.Settings.BaseUri, userName, password);
+            TestApiClient.Authenticator = new TestApiAuthenticator(TestConfiguration.Settings.BaseUri, userName, password);
         }
     }
 }

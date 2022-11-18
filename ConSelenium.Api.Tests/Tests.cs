@@ -17,7 +17,7 @@ namespace ConSelenium.Api.Tests
         [OneTimeSetUp]
         public void OneTimeSetUp()
         {
-            _client = new TestApiClient(new TestApiContext().TestApiClientV1);
+            _client = new TestApiClient(new TestApiContext().TestApiClient);
         }
 
         [SetUp]
@@ -65,6 +65,7 @@ namespace ConSelenium.Api.Tests
             //Arrange
             var productRequest = new ProductRequestBuilder()
                 .AddName("Sukienka")
+                .AddDescription("Super sukienka")
                 .AddPrice(200)
                 .AddStock(300)
                 .Build();
