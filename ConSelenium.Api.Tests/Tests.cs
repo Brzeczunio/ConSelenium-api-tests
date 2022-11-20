@@ -1,11 +1,9 @@
 ﻿using ConSelenium.Api.Client;
 using ConSelenium.Api.Client.Builders;
 using ConSelenium.Api.Client.Models.Requests;
-using ConSelenium.Common.Tools;
 using ConSelenium.Settings;
 using FluentAssertions;
 using FluentAssertions.Execution;
-using System.Net;
 
 namespace ConSelenium.Api.Tests
 {
@@ -48,15 +46,10 @@ namespace ConSelenium.Api.Tests
             //Act
             var response = await _client.CreateUser(_userRequest);
 
-            //Assert
+            //Assert 
             _userRequest.Password = null;
-            var userResponse = await _client.GetUser(response.Data?.Id ?? 0);
-
-            using (new AssertionScope())
-            {
-                response.StatusCode.Should().Be(HttpStatusCode.Created);
-                userResponse.Data.Should().BeEquivalentTo(_userRequest);
-            };
+            var userResponse = await _client.GetUser(response.Id);
+            userResponse.Should().BeEquivalentTo(_userRequest);
         }
 
         [Test]
@@ -74,14 +67,10 @@ namespace ConSelenium.Api.Tests
             var response = await _client.CreateProduct(productRequest);
 
             //Assert
-            var productResponse = await _client.GetProduct(response.Data?.Id ?? 0);
-            using (new AssertionScope())
-            {
-                response.StatusCode.Should().Be(HttpStatusCode.Created);
-                productResponse.Data.Should().BeEquivalentTo(productRequest);
-            };
+            var productResponse = await _client.GetProduct(response.Id);
+            productResponse.Should().BeEquivalentTo(productRequest);
         }
-
+        
         [Test]
         public async Task WhenUserCreateOrder_ShouldBeCreated()
         {
@@ -96,7 +85,7 @@ namespace ConSelenium.Api.Tests
                 .Build();
             var productResponse = await _client.CreateProduct(productRequest);
             var orderProduct = new OrderProductBuilder()
-                .AddProductId(productResponse.Data?.Id ?? 0)
+                .AddProductId(productResponse.Id)
                 .AddQuantity((int)(stock * 0.1))
                 .Build();
             var orderRequest = new OrderRequestBuilder()
@@ -104,15 +93,14 @@ namespace ConSelenium.Api.Tests
                 .Build();
 
             //Act
-            var response = await _client.CreateOrder(userResponse.Data?.Id ?? 0, orderRequest);
+            var response = await _client.CreateOrder(userResponse.Id, orderRequest);
 
             //Assert
-            var orderResponse = await RetryPolicy.GetRestRequestResult(async () => await _client.GetOrder(userResponse.Data?.Id ?? 0, response.Data?.Id ?? 0), r => r.StatusCode == HttpStatusCode.OK);
+            var orderResponse = await _client.GetOrder(userResponse.Id, response.Id);
             using (new AssertionScope())
             {
-                response.StatusCode.Should().Be(HttpStatusCode.Created);
-                orderResponse.Data.CreationDate.Should().BeCloseTo(DateTime.Now, TimeSpan.FromSeconds(30));
-                orderResponse.Data.Should().BeEquivalentTo(orderRequest, o => o.ExcludingMissingMembers());
+                orderResponse.CreationDate.Should().BeCloseTo(DateTime.Now, TimeSpan.FromSeconds(30));
+                orderResponse.Should().BeEquivalentTo(orderRequest, o => o.ExcludingMissingMembers());
             };
         }
     }
