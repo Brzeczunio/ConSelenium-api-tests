@@ -1,6 +1,4 @@
-# ConSelenium
-
-Drogi Uczestniku,
+# Drogi Uczestniku!
 
 Cieszę się, że zdecydowałeś sie wziąć udział w moim warsztacie :)
 
