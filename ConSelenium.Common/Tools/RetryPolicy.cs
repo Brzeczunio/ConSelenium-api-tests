@@ -17,7 +17,7 @@ namespace ConSelenium.Common.Tools
         /// <param name="errorMessage">Optional error message in case the REST response is not as expected.</param>
         /// <returns>TResponse</returns>
         public static async Task<TResponse> GetRestRequestResult<TResponse>(Func<Task<TResponse>> request, Func<TResponse, bool> verifyResult = null, int retryCount = 6,
-            int intervalInMilliseconds = 100, string errorMessage = null) where TResponse : RestResponse
+            int intervalInMilliseconds = 100, string errorMessage = "") where TResponse : RestResponse
         {
             var policyResult = await GetPolicyResult(request, verifyResult, retryCount, intervalInMilliseconds);
 
@@ -34,7 +34,7 @@ namespace ConSelenium.Common.Tools
                 .ExecuteAndCaptureAsync(request);
         }
 
-        private static string BuildErrorMessageForIRestResponse<TResponse>(PolicyResult<TResponse> policyResult, string customMessage = null) where TResponse : RestResponse
+        private static string BuildErrorMessageForIRestResponse<TResponse>(PolicyResult<TResponse> policyResult, string customMessage = "") where TResponse : RestResponse
         {
             var message = new StringBuilder("Request failed.");
             if (policyResult?.FinalHandledResult?.ResponseUri != null && !string.IsNullOrWhiteSpace(policyResult?.FinalHandledResult?.ResponseUri.ToString()))
