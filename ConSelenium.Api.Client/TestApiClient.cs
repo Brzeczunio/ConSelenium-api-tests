@@ -95,7 +95,7 @@ namespace ConSelenium.Api.Client
         {
             var request = new RestRequest($"api/{_apiVersion}/users/{userId}/orders/{orderId}");
 
-            return await RetryPolicy.GetRestRequestResult(async () => await _restClient.ExecuteGetAsync<Order>(request), r => r.StatusCode == HttpStatusCode.OK);
+            return await RetryPolicy.GetRestRequestResult(() => _restClient.ExecuteGetAsync<Order>(request), r => r.StatusCode == HttpStatusCode.OK);
         }
 
         public async Task<Order> GetOrder(int userId, int orderId)
