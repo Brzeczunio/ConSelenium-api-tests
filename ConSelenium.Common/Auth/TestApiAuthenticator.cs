@@ -20,8 +20,8 @@ namespace ConSelenium.Common.Auth
 
         protected override async ValueTask<Parameter> GetAuthenticationParameter(string accessToken)
         {
-            var token = string.IsNullOrEmpty(Token) ? await GetToken() : Token;
-            return new HeaderParameter(KnownHeaders.Authorization, token);
+            Token = string.IsNullOrEmpty(Token) ? await GetToken() : Token;
+            return new HeaderParameter(KnownHeaders.Authorization, Token);
         }
 
         async Task<string> GetToken()
