@@ -107,7 +107,7 @@ namespace ConSelenium.Api.Tests
             var orderResponse = await client.GetOrder(userResponse.Id, response.Id);
             using (new AssertionScope())
             {
-                orderResponse.CreationDate.Should().BeCloseTo(DateTime.UtcNow, TimeSpan.FromSeconds(30));
+                orderResponse.CreationDate.Should().BeCloseTo(DateTime.UtcNow, TimeSpan.FromHours(1));
                 orderResponse.Should().BeEquivalentTo(orderRequest, o => o.ExcludingMissingMembers());
             };
         }
