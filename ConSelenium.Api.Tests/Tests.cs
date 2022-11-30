@@ -1,27 +1,21 @@
 ﻿using ConSelenium.Api.Client;
 using ConSelenium.Api.Client.Builders;
-using ConSelenium.Api.Client.Models.Requests;
 using ConSelenium.Settings;
 using FluentAssertions;
 using FluentAssertions.Execution;
+using NUnit.Allure.Core;
 
 namespace ConSelenium.Api.Tests
 {
+    [AllureNUnit]
     public class Tests
     {
-        TestApiClient _client;
-        UserRequest _userRequest;
-
-        [OneTimeSetUp]
-        public void OneTimeSetUp()
-        {
-            _client = new TestApiClient(new TestApiContext().TestApiClient);
-        }
-
-        [SetUp]
-        public void SetUp()
+        [Test]
+        [Parallelizable]
+        public async Task WhenUserCreates_ShouldBeCreated()
         {
             //Arrange
+            var client = new TestApiClient(new TestApiContext().TestApiClient);
             var random = new Random();
             var address = new AddressBuilder()
                 .AddCity("Bytom")
@@ -29,7 +23,7 @@ namespace ConSelenium.Api.Tests
                 .AddStreet("Włoska")
                 .AddPostalcode("42-612")
                 .Build();
-            _userRequest = new UserRequestBuilder()
+            var userRequest = new UserRequestBuilder()
                 .AddAddress(address)
                 .AddEmail($"xzyz-{random.Next()}@xczx.pl")
                 .AddPassword("prostehaslo")
@@ -37,25 +31,22 @@ namespace ConSelenium.Api.Tests
                 .AddName("Damian")
                 .AddUserName($"brzeczunio-{random.Next()}")
                 .Build();
-        }
 
-
-        [Test]
-        public async Task WhenUserCreates_ShouldBeCreated()
-        {
             //Act
-            var response = await _client.CreateUser(_userRequest);
+            var response = await client.CreateUser(userRequest);
 
             //Assert 
-            _userRequest.Password = null;
-            var userResponse = await _client.GetUser(response.Id);
-            userResponse.Should().BeEquivalentTo(_userRequest);
+            userRequest.Password = null;
+            var userResponse = await client.GetUser(response.Id);
+            userResponse.Should().BeEquivalentTo(userRequest);
         }
 
         [Test]
+        [Parallelizable]
         public async Task WhenAdminCreateProduct_ShouldBeCreated()
         {
             //Arrange
+            var client = new TestApiClient(new TestApiContext().TestApiClient);
             var productRequest = new ProductRequestBuilder()
                 .AddName("Sukienka")
                 .AddDescription("Super sukienka")
@@ -64,26 +55,43 @@ namespace ConSelenium.Api.Tests
                 .Build();
 
             //Act
-            var response = await _client.CreateProduct(productRequest);
+            var response = await client.CreateProduct(productRequest);
 
             //Assert
-            var productResponse = await _client.GetProduct(response.Id);
+            var productResponse = await client.GetProduct(response.Id);
             productResponse.Should().BeEquivalentTo(productRequest);
         }
         
         [Test]
+        [Parallelizable]
         public async Task WhenUserCreateOrder_ShouldBeCreated()
         {
             //Arrange
+            var client = new TestApiClient(new TestApiContext().TestApiClient);
+            var random = new Random();
+            var address = new AddressBuilder()
+                .AddCity("Bytom")
+                .AddhouseNumber("5a/2")
+                .AddStreet("Włoska")
+                .AddPostalcode("42-612")
+                .Build();
+            var userRequest = new UserRequestBuilder()
+                .AddAddress(address)
+                .AddEmail($"xzyz-{random.Next()}@xczx.pl")
+                .AddPassword("prostehaslo")
+                .AddSurname("Brzeczek")
+                .AddName("Damian")
+                .AddUserName($"brzeczunio-{random.Next()}")
+                .Build();
             var stock = 100;
-            var userResponse = await _client.CreateUser(_userRequest);
+            var userResponse = await client.CreateUser(userRequest);
             var productRequest = new ProductRequestBuilder()
                 .AddName("Spódniczka")
                 .AddDescription("Balowa spódniczka")
                 .AddPrice(100)
                 .AddStock(stock)
                 .Build();
-            var productResponse = await _client.CreateProduct(productRequest);
+            var productResponse = await client.CreateProduct(productRequest);
             var orderProduct = new OrderProductBuilder()
                 .AddProductId(productResponse.Id)
                 .AddQuantity((int)(stock * 0.1))
@@ -93,10 +101,10 @@ namespace ConSelenium.Api.Tests
                 .Build();
 
             //Act
-            var response = await _client.CreateOrder(userResponse.Id, orderRequest);
+            var response = await client.CreateOrder(userResponse.Id, orderRequest);
 
             //Assert
-            var orderResponse = await _client.GetOrder(userResponse.Id, response.Id);
+            var orderResponse = await client.GetOrder(userResponse.Id, response.Id);
             using (new AssertionScope())
             {
                 orderResponse.CreationDate.Should().BeCloseTo(DateTime.Now, TimeSpan.FromSeconds(30));
