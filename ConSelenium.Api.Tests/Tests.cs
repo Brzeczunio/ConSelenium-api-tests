@@ -12,7 +12,7 @@ namespace ConSelenium.Api.Tests
     {
         [Test]
         [Parallelizable]
-        public async Task WhenUserCreates_ShouldBeCreated()
+        public async Task WhenUserCreated_ShouldBeCreated()
         {
             //Arrange
             var client = new TestApiClient(new TestApiContext().TestApiClient);
@@ -43,7 +43,7 @@ namespace ConSelenium.Api.Tests
 
         [Test]
         [Parallelizable]
-        public async Task WhenAdminCreateProduct_ShouldBeCreated()
+        public async Task WhenAdminCreatesProduct_ShouldBeCreated()
         {
             //Arrange
             var client = new TestApiClient(new TestApiContext().TestApiClient);
@@ -64,7 +64,7 @@ namespace ConSelenium.Api.Tests
         
         [Test]
         [Parallelizable]
-        public async Task WhenUserCreateOrder_ShouldBeCreated()
+        public async Task WhenUserCreatesOrder_ShouldBeCreated()
         {
             //Arrange
             var client = new TestApiClient(new TestApiContext().TestApiClient);
