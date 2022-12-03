@@ -1,5 +1,6 @@
 ﻿using ConSelenium.Api.Client;
 using ConSelenium.Api.Client.Builders;
+using ConSelenium.Api.Client.Models.Responses;
 using ConSelenium.Settings;
 using FluentAssertions;
 using FluentAssertions.Execution;
@@ -35,9 +36,11 @@ namespace ConSelenium.Api.Tests
             //Act
             var response = await client.CreateUser(userRequest);
 
-            //Assert 
+            //Assert
+            var userId = response.Id;
+            userRequest.Id = userId;
             userRequest.Password = null;
-            var userResponse = await client.GetUser(response.Id);
+            var userResponse = await client.GetUser(userId);
             userResponse.Should().BeEquivalentTo(userRequest);
         }
 
@@ -58,7 +61,9 @@ namespace ConSelenium.Api.Tests
             var response = await client.CreateProduct(productRequest);
 
             //Assert
-            var productResponse = await client.GetProduct(response.Id);
+            var porductId = response.Id;
+            productRequest.Id = porductId;
+            var productResponse = await client.GetProduct(porductId);
             productResponse.Should().BeEquivalentTo(productRequest);
         }
         
@@ -67,8 +72,10 @@ namespace ConSelenium.Api.Tests
         public async Task WhenUserCreatesOrder_ShouldBeCreated()
         {
             //Arrange
-            var client = new TestApiClient(new TestApiContext().TestApiClient);
             var random = new Random();
+            var userName = $"brzeczunio-{random.Next()}";
+            var password = "prostehaslo";
+            var client = new TestApiClient(new TestApiContext().TestApiClient);
             var address = new AddressBuilder()
                 .AddCity("Bytom")
                 .AddhouseNumber("5a/2")
@@ -78,10 +85,10 @@ namespace ConSelenium.Api.Tests
             var userRequest = new UserRequestBuilder()
                 .AddAddress(address)
                 .AddEmail($"xzyz-{random.Next()}@xczx.pl")
-                .AddPassword("prostehaslo")
+                .AddPassword(password)
                 .AddSurname("Brzeczek")
                 .AddName("Damian")
-                .AddUserName($"brzeczunio-{random.Next()}")
+                .AddUserName(userName)
                 .Build();
             var stock = 100;
             var userResponse = await client.CreateUser(userRequest);
@@ -92,9 +99,26 @@ namespace ConSelenium.Api.Tests
                 .AddStock(stock)
                 .Build();
             var productResponse = await client.CreateProduct(productRequest);
+            var product = await client.GetProduct(productResponse.Id);
+            var quantity = (int)(stock * 0.1);
+            var expectedOrderProduct = new Order
+            {
+                OrderProducts = new List<OrderProduct>
+                {
+                    new OrderProduct
+                    {
+                        Product = product,
+                        Quantity = quantity
+                    }
+                },
+                CreationDate = DateTime.Now
+            };
+            var apiContext = new TestApiContext();
+            apiContext.Login(userName, password);
+            client = new TestApiClient(apiContext.TestApiClient);
             var orderProduct = new OrderProductBuilder()
                 .AddProductId(productResponse.Id)
-                .AddQuantity((int)(stock * 0.1))
+                .AddQuantity(quantity)
                 .Build();
             var orderRequest = new OrderRequestBuilder()
                 .AddOrderProduct(orderProduct)
@@ -107,8 +131,9 @@ namespace ConSelenium.Api.Tests
             var orderResponse = await client.GetOrder(userResponse.Id, response.Id);
             using (new AssertionScope())
             {
+                orderResponse.OrderProducts.Select(x => x.Should().BeEquivalentTo(expectedOrderProduct.OrderProducts));
                 orderResponse.CreationDate.Should().BeCloseTo(DateTime.UtcNow, TimeSpan.FromHours(1));
-                orderResponse.Should().BeEquivalentTo(orderRequest, o => o.ExcludingMissingMembers());
+                orderResponse.CreationDate.Should().BeCloseTo(expectedOrderProduct.CreationDate, TimeSpan.FromHours(1));
             };
         }
     }
